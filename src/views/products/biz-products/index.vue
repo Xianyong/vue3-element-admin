@@ -8,7 +8,7 @@
       @reset-click="handleResetClick"
     ></page-search>
 
-    <!-- 列表 -->
+    <!-- Ensure proper closing of page-content -->
     <page-content
       ref="contentRef"
       :content-config="contentConfig"
@@ -18,7 +18,56 @@
       @toolbar-click="handleToolbarClick"
       @operate-click="handleOperateClick"
       @filter-change="handleFilterChange"
-    ></page-content>
+    >
+      <!-- Custom column for description with modal popup -->
+      <template #description="{ row }">
+        <el-button v-if="row.description" type="primary" link @click="showDescriptionModal(row)">
+          查看详情
+        </el-button>
+        <span v-else>-</span>
+      </template>
+    </page-content>
+
+    <!-- Description Modal -->
+    <el-dialog
+      v-model="descriptionModalVisible"
+      :title="currentRow?.name + ' - 详细信息'"
+      width="500px"
+    >
+      <div v-if="currentRow">
+        <p>
+          <strong>商品名称:</strong>
+          {{ currentRow.name }}
+        </p>
+        <p>
+          <strong>商品规格:</strong>
+          {{ currentRow.specification }}
+        </p>
+        <p>
+          <strong>产地:</strong>
+          {{ currentRow.origin }}
+        </p>
+        <p>
+          <strong>生产日期:</strong>
+          {{ currentRow.productionDate }}
+        </p>
+        <p>
+          <strong>保质日期:</strong>
+          {{ currentRow.expirationDate }}
+        </p>
+        <p>
+          <strong>单价:</strong>
+          {{ currentRow.unitPrice }} 元
+        </p>
+        <p>
+          <strong>详细描述:</strong>
+          {{ currentRow.description }}
+        </p>
+      </div>
+      <template #footer>
+        <el-button @click="descriptionModalVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
 
     <!-- 新增 -->
     <page-modal
@@ -38,6 +87,15 @@
 
 <script setup lang="ts">
 defineOptions({ name: "BizProducts" });
+
+// Add these to your existing script setup
+const descriptionModalVisible = ref(false);
+const currentRow = ref<any>(null);
+
+const showDescriptionModal = (row: any) => {
+  currentRow.value = row;
+  descriptionModalVisible.value = true;
+};
 
 import BizProductsAPI, {
   BizProductsForm,
@@ -65,7 +123,19 @@ const {
 // 搜索配置
 const searchConfig: ISearchConfig = reactive({
   permPrefix: "products:biz-products",
-  formItems: [],
+  formItems: [
+    {
+      tips: "支持模糊搜索",
+      type: "input",
+      label: "商品名称",
+      prop: "name",
+      attrs: {
+        placeholder: "商品名称（如：XX品牌 18.9L 桶装纯净水）",
+        clearable: true,
+        style: { width: "400px" },
+      },
+    },
+  ],
 });
 
 // 列表配置
@@ -102,25 +172,25 @@ const contentConfig: IContentConfig<BizProductsPageQuery> = reactive({
   // 表格列配置
   cols: [
     { type: "selection", width: 55, align: "center" },
-    // { label: "商品唯一标识符", prop: "id" },
-    { label: "商品名称", prop: "name" },
+    { label: "商品唯一标识符", prop: "id", show: false },
+    { label: "商品名称", prop: "name", slotName: "name" },
     { label: "商品规格", prop: "specification" },
     { label: "产地", prop: "origin" },
     { label: "生产日期", prop: "productionDate" },
     { label: "保质日期", prop: "expirationDate" },
     { label: "单价（元）", prop: "unitPrice" },
-    { label: "详细信息", prop: "description" },
-    // { label: "商品预览图片的存储路径或URL", prop: "imagePreview" },
-    // { label: "记录创建时间", prop: "createdTime" },
-    // { label: "记录最后更新时间", prop: "updatedTime" },
-    // { label: "记录创建人", prop: "createdBy" },
-    // { label: "记录最后修改人", prop: "updatedBy" },
+    { label: "详细信息", prop: "description", templet: "custom", show: false },
+    { label: "预览存储路径", prop: "imagePreview", show: false },
+    { label: "记录创建时间", prop: "createTime", show: false },
+    { label: "记录最后更新时间", prop: "updateTime", show: false },
+    { label: "记录创建人", prop: "createBy", show: false },
+    { label: "记录最后修改人", prop: "updateBy", show: false },
     {
       label: "操作",
       prop: "operation",
       width: 220,
       templet: "tool",
-      operat: ["edit", "delete"],
+      operat: ["edit", "delete", "view"],
     },
   ],
 });
@@ -147,9 +217,10 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
     //   attrs: {
     //     placeholder: "商品唯一标识符",
     //   },
-    //   rules: [{ required: true, message: "商品唯一标识符不能为空", trigger: "blur" }],
+    //   rules: [{ required: false, message: "商品唯一标识符不能为空", trigger: "blur" }],
     //   label: "商品唯一标识符",
     //   prop: "id",
+    //   show: false,
     // },
     {
       type: "input",
@@ -185,7 +256,7 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
       prop: "origin",
     },
     {
-      type: "input",
+      type: "date-picker",
       attrs: {
         placeholder: "生产日期",
       },
@@ -194,7 +265,7 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
       prop: "productionDate",
     },
     {
-      type: "input",
+      type: "date-picker",
       attrs: {
         placeholder: "保质日期",
       },
@@ -228,22 +299,22 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
       prop: "imagePreview",
     },
     // {
-    //   type: "input",
+    //   type: "date-picker",
     //   attrs: {
     //     placeholder: "记录创建时间",
     //   },
-    //   rules: [{ required: true, message: "记录创建时间不能为空", trigger: "blur" }],
+    //   rules: [{ required: false, message: "记录创建时间不能为空", trigger: "blur" }],
     //   label: "记录创建时间",
-    //   prop: "createdTime",
+    //   prop: "createTime",
     // },
     // {
-    //   type: "input",
+    //   type: "date-picker",
     //   attrs: {
     //     placeholder: "记录最后更新时间",
     //   },
-    //   rules: [{ required: true, message: "记录最后更新时间不能为空", trigger: "blur" }],
+    //   rules: [{ required: false, message: "记录最后更新时间不能为空", trigger: "blur" }],
     //   label: "记录最后更新时间",
-    //   prop: "updatedTime",
+    //   prop: "updateTime",
     // },
     // {
     //   type: "input",
@@ -251,7 +322,7 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
     //     placeholder: "记录创建人",
     //   },
     //   label: "记录创建人",
-    //   prop: "createdBy",
+    //   prop: "createBy",
     // },
     // {
     //   type: "input",
@@ -259,14 +330,15 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
     //     placeholder: "记录最后修改人",
     //   },
     //   label: "记录最后修改人",
-    //   prop: "updatedBy",
+    //   prop: "updateBy",
     // },
   ],
   // 提交函数
   formAction: (data: BizProductsForm) => {
+    console.log("formAction data:", data);
     if (data.id) {
       // 编辑
-      return BizProductsAPI.update(data.id as string, data);
+      return BizProductsAPI.update(data.id.toString(), data);
     } else {
       // 新增
       return BizProductsAPI.create(data);
@@ -284,6 +356,7 @@ const editModalConfig: IModalConfig<BizProductsForm> = reactive({
   },
   pk: "id",
   formAction(data: any) {
+    // console.log("formAction data 11:", data);
     return BizProductsAPI.update(data.id as string, data);
   },
   formItems: addModalConfig.formItems, // 复用新增的表单项
@@ -295,6 +368,8 @@ const handleOperateClick = (data: IObject) => {
     handleEditClick(data.row, async () => {
       return await BizProductsAPI.getFormData(data.row.id);
     });
+  } else if (data.name === "view") {
+    showDescriptionModal(data.row);
   }
 };
 

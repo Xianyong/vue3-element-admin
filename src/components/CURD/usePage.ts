@@ -10,6 +10,7 @@ function usePage() {
   // 搜索
   function handleQueryClick(queryParams: IObject) {
     const filterParams = contentRef.value?.getFilterParams();
+    // console.log("queryParams", queryParams);
     contentRef.value?.fetchPageData({ ...queryParams, ...filterParams }, true);
   }
   // 重置

@@ -5,6 +5,7 @@ const BIZPRODUCTS_BASE_URL = "/api/v1/biz-products";
 const BizProductsAPI = {
   /** 获取商品供应分页数据 */
   getPage(queryParams?: BizProductsPageQuery) {
+    // console.log("getPage", queryParams);
     return request<any, PageResult<BizProductsPageVO[]>>({
       url: `${BIZPRODUCTS_BASE_URL}/page`,
       method: "get",
@@ -67,7 +68,10 @@ const BizProductsAPI = {
 export default BizProductsAPI;
 
 /** 商品供应分页查询参数 */
-export interface BizProductsPageQuery extends PageQuery {}
+export interface BizProductsPageQuery extends PageQuery {
+  /** 搜索关键字 */
+  name?: string;
+}
 
 /** 商品供应表单对象 */
 export interface BizProductsForm {
@@ -90,13 +94,13 @@ export interface BizProductsForm {
   /** 商品预览图片的存储路径或URL */
   imagePreview?: string;
   /** 记录创建时间 */
-  createdTime?: Date;
+  createTime?: Date;
   /** 记录最后更新时间 */
-  updatedTime?: Date;
+  updateTime?: Date;
   /** 记录创建人 */
-  createdBy?: number;
+  createBy?: number;
   /** 记录最后修改人 */
-  updatedBy?: number;
+  updateBy?: number;
 }
 
 /** 商品供应分页对象 */
@@ -120,11 +124,11 @@ export interface BizProductsPageVO {
   /** 商品预览图片的存储路径或URL */
   imagePreview?: string;
   /** 记录创建时间 */
-  createdTime?: Date;
+  createTime?: Date;
   /** 记录最后更新时间 */
-  updatedTime?: Date;
+  updateTime?: Date;
   /** 记录创建人 */
-  createdBy?: number;
+  createBy?: number;
   /** 记录最后修改人 */
-  updatedBy?: number;
+  updateBy?: number;
 }
