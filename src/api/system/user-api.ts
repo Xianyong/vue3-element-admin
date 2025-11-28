@@ -332,13 +332,13 @@ export interface UserProfileVO {
   /** 创建时间 */
   createTime?: Date;
 
-  /** 创建时间 */
+  /** 账号余额 */
   remainingSum?: number;
 
-  /** 创建时间 */
+  /** 最近消费时间 */
   latestConsumeTime?: Date;
 
-  /** 创建时间 */
+  /** 最近消费金额*/
   latestConsumeCost?: number;
 }
 

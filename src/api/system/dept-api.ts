@@ -57,6 +57,12 @@ export interface DeptVO {
   status?: number;
   /** 修改时间 */
   updateTime?: Date;
+  /** 站点地址 */
+  dptAddress?: string;
+  /** 站点类型 */
+  dptType?: number;
+  /** 销售提成比例 0-100 */
+  dptSaleRate?: number;
 }
 
 export interface DeptForm {

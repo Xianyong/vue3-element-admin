@@ -60,8 +60,21 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="name" label="部门名称" min-width="200" />
-        <el-table-column prop="code" label="部门编号" width="200" />
+        <el-table-column prop="name" label="站点名称" min-width="200" />
+        <el-table-column prop="code" label="站点编号" width="200" />
+        <el-table-column prop="dptAddress" label="地址" width="200" />
+        <el-table-column prop="dptType" label="类型" width="200">
+          <template #default="scope">
+            <el-tag v-if="scope.row.dptType == 1" type="success">一级</el-tag>
+            <el-tag v-else type="info">二级</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="dptSaleRate" label="销售提成" width="200">
+          <template #default="scope">
+            <el-text v-if="scope.row.dptSaleRate < 0" type="info">0</el-text>
+            <el-text v-else type="warning">{{ scope.row.dptSaleRate }}%</el-text>
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag v-if="scope.row.status == 1" type="success">正常</el-tag>
