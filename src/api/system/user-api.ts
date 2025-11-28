@@ -331,6 +331,15 @@ export interface UserProfileVO {
 
   /** 创建时间 */
   createTime?: Date;
+
+  /** 创建时间 */
+  remainingSum?: number;
+
+  /** 创建时间 */
+  latestConsumeTime?: Date;
+
+  /** 创建时间 */
+  latestConsumeCost?: number;
 }
 
 /** 个人中心用户信息表单 */

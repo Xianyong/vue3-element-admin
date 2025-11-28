@@ -111,6 +111,15 @@
             <el-descriptions-item label="创建时间">
               {{ userProfile.createTime }}
             </el-descriptions-item>
+            <el-descriptions-item label="账号余额">
+              {{ userProfile.remainingSum }}
+            </el-descriptions-item>
+            <el-descriptions-item label="最近消费时间">
+              {{ userProfile.latestConsumeTime }}
+            </el-descriptions-item>
+            <el-descriptions-item label="最近消费金额">
+              {{ userProfile.latestConsumeCost }}
+            </el-descriptions-item>
           </el-descriptions>
         </el-card>
 
