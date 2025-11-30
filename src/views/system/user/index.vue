@@ -105,7 +105,7 @@
                 <DictLabel v-model="scope.row.gender" code="gender" />
               </template>
             </el-table-column>
-            <el-table-column label="部门" width="120" align="center" prop="deptName" />
+            <el-table-column label="站点" width="120" align="center" prop="deptName" />
             <el-table-column label="手机号码" align="center" prop="mobile" width="120" />
             <el-table-column label="邮箱" align="center" prop="email" width="160" />
             <el-table-column label="状态" align="center" prop="status" width="80">
@@ -274,6 +274,7 @@ const userFormRef = ref();
 const queryParams = reactive<UserPageQuery>({
   pageNum: 1,
   pageSize: 10,
+  deptId: undefined,
 });
 
 const pageData = ref<UserPageVO[]>();
@@ -334,8 +335,10 @@ async function fetchData() {
 
 // 查询（重置页码后获取数据）
 function handleQuery() {
+  // console.log("deptId:", userStore.userInfo.deptId);
   // console.log(queryParams.deptId);
   queryParams.pageNum = 1;
+
   fetchData();
 }
 
@@ -343,7 +346,7 @@ function handleQuery() {
 function handleResetQuery() {
   queryFormRef.value.resetFields();
   queryParams.pageNum = 1;
-  queryParams.deptId = undefined;
+  queryParams.deptId = userStore.userInfo.deptId;
   queryParams.createTime = undefined;
   fetchData();
 }
@@ -529,6 +532,7 @@ function handleExport() {
 
 onMounted(() => {
   // console.log(dptTree.deptId);
+  queryParams.deptId = userStore.userInfo.deptId;
   handleQuery();
 });
 </script>

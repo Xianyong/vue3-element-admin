@@ -217,6 +217,9 @@ export interface UserInfo {
   /** 用户ID */
   userId?: string;
 
+  /** 站点ID */
+  deptId?: string;
+
   /** 用户名 */
   username?: string;
 
