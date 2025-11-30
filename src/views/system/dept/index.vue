@@ -61,30 +61,37 @@
       >
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column prop="name" label="站点名称" min-width="200" />
-        <el-table-column prop="code" label="站点编号" width="200" />
+        <el-table-column prop="code" label="站点编号" width="100" />
         <el-table-column prop="dptAddress" label="地址" width="200" />
-        <el-table-column prop="dptType" label="类型" width="200">
+        <el-table-column align="center" label="类型" width="100">
           <template #default="scope">
-            <el-tag v-if="scope.row.dptType == 1" type="success">一级</el-tag>
-            <el-tag v-else type="info">二级</el-tag>
+            <DictLabel v-model="scope.row.dptType" :code="'dept_type'" :size="'large'" />
           </template>
         </el-table-column>
-        <el-table-column prop="dptSaleRate" label="销售提成" width="200">
+        <el-table-column prop="dptSaleRate" label="销售提成" width="100">
           <template #default="scope">
-            <el-text v-if="scope.row.dptSaleRate < 0" type="info">0</el-text>
-            <el-text v-else type="warning">{{ scope.row.dptSaleRate }}%</el-text>
+            <template v-if="Number(scope.row.dptType) === DeptType.WATER_STATION">
+              <el-text type="warning">{{ scope.row.dptSaleRate }}%</el-text>
+            </template>
+            <template v-else>-</template>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="状态" width="80">
           <template #default="scope">
             <el-tag v-if="scope.row.status == 1" type="success">正常</el-tag>
             <el-tag v-else type="info">禁用</el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column prop="sort" label="排序" width="100" />
+        <el-table-column prop="sort" label="排序" width="80" />
 
-        <el-table-column label="操作" fixed="right" align="left" width="200">
+        <el-table-column
+          v-hasPerm="['sys:dept:add', 'sys:dept:edit', 'sys:dept:delete']"
+          label="操作"
+          fixed="right"
+          align="left"
+          width="200"
+        >
           <template #default="scope">
             <el-button
               v-hasPerm="['sys:dept:add']"
@@ -128,21 +135,21 @@
       @closed="handleCloseDialog"
     >
       <el-form ref="deptFormRef" :model="formData" :rules="rules" label-width="80px">
-        <el-form-item label="上级部门" prop="parentId">
+        <el-form-item label="上级站点" prop="parentId">
           <el-tree-select
             v-model="formData.parentId"
-            placeholder="选择上级部门"
+            placeholder="选择上级站点"
             :data="deptOptions"
             filterable
             check-strictly
             :render-after-expand="false"
           />
         </el-form-item>
-        <el-form-item label="部门名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入部门名称" />
+        <el-form-item label="站点名称" prop="name">
+          <el-input v-model="formData.name" placeholder="请输入站点名称" />
         </el-form-item>
-        <el-form-item label="部门编号" prop="code">
-          <el-input v-model="formData.code" placeholder="请输入部门编号" />
+        <el-form-item label="站点编号" prop="code">
+          <el-input v-model="formData.code" placeholder="请输入站点编号" />
         </el-form-item>
         <el-form-item label="显示排序" prop="sort">
           <el-input-number
@@ -152,11 +159,20 @@
             :min="0"
           />
         </el-form-item>
-        <el-form-item label="部门状态">
+        <el-form-item label="站点状态">
           <el-radio-group v-model="formData.status">
             <el-radio :value="1">正常</el-radio>
             <el-radio :value="0">禁用</el-radio>
           </el-radio-group>
+        </el-form-item>
+        <el-form-item label="站点地址" prop="dptAddress">
+          <el-input v-model="formData.dptAddress" placeholder="请输入站点地址" />
+        </el-form-item>
+        <el-form-item label="站点类型" prop="dptType">
+          <Dict v-model="formData.dptType" code="dept_type" @change="handleDptTypeChange" />
+        </el-form-item>
+        <el-form-item v-if="isWaterStation" label="销售提成" prop="dptSaleRate">
+          <el-input v-model="formData.dptSaleRate" placeholder="请输入站点销售提成比例" />
         </el-form-item>
       </el-form>
 
@@ -177,6 +193,7 @@ defineOptions({
 });
 
 import DeptAPI, { DeptVO, DeptForm, DeptQuery } from "@/api/system/dept-api";
+import { DeptType } from "@/enums/settings/dpttype-enum";
 
 const queryFormRef = ref();
 const deptFormRef = ref();
@@ -198,11 +215,40 @@ const formData = reactive<DeptForm>({
   sort: 1,
 });
 
+const isWaterStation = computed(() => Number(formData.dptType) === DeptType.WATER_STATION);
+function handleDptTypeChange(value: any) {
+  formData.dptType = value;
+  // Use nextTick to ensure the computed property updates before logging
+  nextTick(() => {
+    // console.log("formData.dptType", formData.dptType, "isWaterStation", isWaterStation.value);
+    if (isWaterStation.value) {
+      rules.dptSaleRate[0].required = true;
+    } else {
+      rules.dptSaleRate[0].required = false;
+    }
+  });
+}
+
 const rules = reactive({
-  parentId: [{ required: true, message: "上级部门不能为空", trigger: "change" }],
-  name: [{ required: true, message: "部门名称不能为空", trigger: "blur" }],
-  code: [{ required: true, message: "部门编号不能为空", trigger: "blur" }],
+  parentId: [{ required: true, message: "上级站点不能为空", trigger: "change" }],
+  name: [{ required: true, message: "站点名称不能为空", trigger: "blur" }],
+  code: [{ required: true, message: "站点编号不能为空", trigger: "blur" }],
   sort: [{ required: true, message: "显示排序不能为空", trigger: "blur" }],
+  dptType: [{ required: true, message: "站点类型不能为空", trigger: "change" }],
+  dptSaleRate: [
+    {
+      required: true,
+      message: "销售提成比例不能为空",
+      trigger: "blur",
+      validator: (rule: any, value: any, callback: any) => {
+        if (isWaterStation.value && !value && value !== 0) {
+          callback(new Error("销售提成比例不能为空"));
+        } else {
+          callback();
+        }
+      },
+    },
+  ],
 });
 
 // 查询部门
@@ -244,12 +290,12 @@ async function handleOpenDialog(parentId?: string, deptId?: string) {
 
   dialog.visible = true;
   if (deptId) {
-    dialog.title = "修改部门";
+    dialog.title = "修改站点";
     DeptAPI.getFormData(deptId).then((data) => {
       Object.assign(formData, data);
     });
   } else {
-    dialog.title = "新增部门";
+    dialog.title = "新增站点";
     formData.parentId = parentId || "0";
   }
 }
@@ -261,6 +307,11 @@ function handleSubmit() {
       loading.value = true;
       const deptId = formData.id;
       if (deptId) {
+        if (deptId === formData.parentId) {
+          ElMessage.error("上级站点不能选择自己");
+          loading.value = false;
+          return;
+        }
         DeptAPI.update(deptId, formData)
           .then(() => {
             ElMessage.success("修改成功");

@@ -5,11 +5,15 @@ const DEPT_BASE_URL = "/api/v1/dept";
 const DeptAPI = {
   /** 获取部门树形列表 */
   getList(queryParams?: DeptQuery) {
-    return request<any, DeptVO[]>({ url: `${DEPT_BASE_URL}`, method: "get", params: queryParams });
+    return request<any, DeptVO[]>({
+      url: `${DEPT_BASE_URL}/me`,
+      method: "get",
+      params: queryParams,
+    });
   },
   /** 获取部门下拉数据源 */
   getOptions() {
-    return request<any, OptionType[]>({ url: `${DEPT_BASE_URL}/options`, method: "get" });
+    return request<any, OptionType[]>({ url: `${DEPT_BASE_URL}/options/me`, method: "get" });
   },
   /** 获取部门表单数据 */
   getFormData(id: string) {
@@ -78,4 +82,10 @@ export interface DeptForm {
   sort?: number;
   /** 状态(1:启用；0：禁用) */
   status?: number;
+  /** 站点地址 */
+  dptAddress?: string;
+  /** 站点类型 */
+  dptType?: number;
+  /** 销售提成比例 0-100 */
+  dptSaleRate?: number;
 }

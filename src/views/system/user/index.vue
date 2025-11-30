@@ -2,7 +2,7 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20">
-      <!-- 部门树 -->
+      <!-- 站点树 -->
       <el-col :lg="4" :xs="24" class="mb-[12px]">
         <DeptTree v-model="queryParams.deptId" @node-click="handleQuery" />
       </el-col>
@@ -116,7 +116,12 @@
               </template>
             </el-table-column>
             <el-table-column label="创建时间" align="center" prop="createTime" width="150" />
-            <el-table-column label="操作" fixed="right" width="220">
+            <el-table-column
+              v-hasPerm="['sys:user:reset-password', 'sys:user:edit', 'sys:user:delete']"
+              label="操作"
+              fixed="right"
+              width="220"
+            >
               <template #default="scope">
                 <el-button
                   v-hasPerm="'sys:user:reset-password'"
@@ -184,10 +189,10 @@
           <el-input v-model="formData.nickname" placeholder="请输入用户昵称" />
         </el-form-item>
 
-        <el-form-item label="所属部门" prop="deptId">
+        <el-form-item label="所属站点" prop="deptId">
           <el-tree-select
             v-model="formData.deptId"
-            placeholder="请选择所属部门"
+            placeholder="请选择所属站点"
             :data="deptOptions"
             filterable
             check-strictly
@@ -254,6 +259,7 @@ import RoleAPI from "@/api/system/role-api";
 import DeptTree from "./components/DeptTree.vue";
 import UserImport from "./components/UserImport.vue";
 import { useUserStore } from "@/store";
+
 const userStore = useUserStore();
 defineOptions({
   name: "User",
@@ -328,6 +334,7 @@ async function fetchData() {
 
 // 查询（重置页码后获取数据）
 function handleQuery() {
+  // console.log(queryParams.deptId);
   queryParams.pageNum = 1;
   fetchData();
 }
@@ -521,6 +528,7 @@ function handleExport() {
 }
 
 onMounted(() => {
+  // console.log(dptTree.deptId);
   handleQuery();
 });
 </script>
