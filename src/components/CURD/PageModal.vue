@@ -138,7 +138,7 @@ import type { FormInstance, FormRules } from "element-plus";
 import type { IComponentType, IModalConfig, IObject } from "./types";
 import InputTag from "@/components/InputTag/index.vue";
 import IconSelect from "@/components/IconSelect/index.vue";
-
+import SingleImageUpload from "@/components/Upload/SingleImageUpload.vue";
 defineSlots<{ [key: string]: (_args: any) => any }>();
 // 定义接收的属性
 const props = defineProps<{ modalConfig: IModalConfig }>();
@@ -163,6 +163,7 @@ const componentMap = new Map<IComponentType, any>([
   ["radio", markRaw(ElRadioGroup)], // @ts-ignore"
   ["checkbox", markRaw(ElCheckboxGroup)], // @ts-ignore"
   ["icon-select", markRaw(IconSelect)], // @ts-ignore"
+  ["single-image-upload", markRaw(SingleImageUpload)],
   ["custom", ""],
 ]);
 const childrenMap = new Map<IComponentType, any>([

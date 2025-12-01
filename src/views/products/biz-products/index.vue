@@ -103,8 +103,7 @@ import BizProductsAPI, {
 } from "@/api/products/biz-products-api";
 import type { IObject, IModalConfig, IContentConfig, ISearchConfig } from "@/components/CURD/types";
 import usePage from "@/components/CURD/usePage";
-// import MultiImageUpload from "@/components/Upload/MultiImageUpload.vue";
-import SingleImageUpload from "@/components/Upload/SingleImageUpload.vue";
+
 // 组合式 CRUD
 const {
   searchRef,
@@ -180,7 +179,7 @@ const contentConfig: IContentConfig<BizProductsPageQuery> = reactive({
     { label: "生产日期", prop: "productionDate" },
     { label: "保质日期", prop: "expirationDate" },
     { label: "单价（元）", prop: "unitPrice" },
-    { label: "详细信息", prop: "description", templet: "custom", show: true },
+    { label: "详细信息", prop: "description", templet: "custom", show: false },
     { label: "商品图片", prop: "imagePreview", templet: "image", width: 120 },
     { label: "预览存储路径", prop: "imagePreview", show: false },
     { label: "记录创建时间", prop: "createTime", show: false },
@@ -293,8 +292,7 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
       prop: "description",
     },
     {
-      type: "custom",
-      component: SingleImageUpload,
+      type: "single-image-upload",
       attrs: {
         placeholder: "商品预览图片的存储路径或URL",
         accept: ".png,.jpg,.jpeg,.gif,.bmp",
@@ -306,7 +304,7 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
       },
       label: "预览存储路径",
       prop: "imagePreview",
-      value: "",
+      // value: "",
     },
   ],
   // 提交函数

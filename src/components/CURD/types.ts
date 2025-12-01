@@ -13,7 +13,14 @@ export type IObject = Record<string, any>;
 
 type DateComponent = "date-picker" | "time-picker" | "time-select" | "custom-tag" | "input-tag";
 type InputComponent = "input" | "select" | "input-number" | "cascader" | "tree-select";
-type OtherComponent = "text" | "radio" | "checkbox" | "switch" | "icon-select" | "custom";
+type OtherComponent =
+  | "text"
+  | "radio"
+  | "checkbox"
+  | "switch"
+  | "icon-select"
+  | "single-image-upload"
+  | "custom";
 export type ISearchComponent = DateComponent | InputComponent | "custom";
 export type IComponentType = DateComponent | InputComponent | OtherComponent;
 
