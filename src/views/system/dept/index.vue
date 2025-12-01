@@ -251,11 +251,12 @@ const rules = reactive({
   ],
 });
 
-// 查询部门
+// 查询站点
 function handleQuery() {
   loading.value = true;
   DeptAPI.getList(queryParams).then((data) => {
     deptList.value = data;
+    console.log("deptList", data);
     loading.value = false;
   });
 }

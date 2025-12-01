@@ -103,7 +103,8 @@ import BizProductsAPI, {
 } from "@/api/products/biz-products-api";
 import type { IObject, IModalConfig, IContentConfig, ISearchConfig } from "@/components/CURD/types";
 import usePage from "@/components/CURD/usePage";
-
+// import MultiImageUpload from "@/components/Upload/MultiImageUpload.vue";
+import SingleImageUpload from "@/components/Upload/SingleImageUpload.vue";
 // 组合式 CRUD
 const {
   searchRef,
@@ -179,7 +180,8 @@ const contentConfig: IContentConfig<BizProductsPageQuery> = reactive({
     { label: "生产日期", prop: "productionDate" },
     { label: "保质日期", prop: "expirationDate" },
     { label: "单价（元）", prop: "unitPrice" },
-    { label: "详细信息", prop: "description", templet: "custom", show: false },
+    { label: "详细信息", prop: "description", templet: "custom", show: true },
+    { label: "商品图片", prop: "imagePreview", templet: "image", width: 120 },
     { label: "预览存储路径", prop: "imagePreview", show: false },
     { label: "记录创建时间", prop: "createTime", show: false },
     { label: "记录最后更新时间", prop: "updateTime", show: false },
@@ -291,47 +293,21 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
       prop: "description",
     },
     {
-      type: "input",
+      type: "custom",
+      component: SingleImageUpload,
       attrs: {
         placeholder: "商品预览图片的存储路径或URL",
+        accept: ".png,.jpg,.jpeg,.gif,.bmp",
+        maxFileSize: 10,
+        style: {
+          width: "150px",
+          height: "150px",
+        },
       },
       label: "预览存储路径",
       prop: "imagePreview",
+      value: "",
     },
-    // {
-    //   type: "date-picker",
-    //   attrs: {
-    //     placeholder: "记录创建时间",
-    //   },
-    //   rules: [{ required: false, message: "记录创建时间不能为空", trigger: "blur" }],
-    //   label: "记录创建时间",
-    //   prop: "createTime",
-    // },
-    // {
-    //   type: "date-picker",
-    //   attrs: {
-    //     placeholder: "记录最后更新时间",
-    //   },
-    //   rules: [{ required: false, message: "记录最后更新时间不能为空", trigger: "blur" }],
-    //   label: "记录最后更新时间",
-    //   prop: "updateTime",
-    // },
-    // {
-    //   type: "input",
-    //   attrs: {
-    //     placeholder: "记录创建人",
-    //   },
-    //   label: "记录创建人",
-    //   prop: "createBy",
-    // },
-    // {
-    //   type: "input",
-    //   attrs: {
-    //     placeholder: "记录最后修改人",
-    //   },
-    //   label: "记录最后修改人",
-    //   prop: "updateBy",
-    // },
   ],
   // 提交函数
   formAction: (data: BizProductsForm) => {
