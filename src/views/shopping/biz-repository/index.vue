@@ -6,8 +6,7 @@
       :search-config="searchConfig"
       @query-click="handleQueryClick"
       @reset-click="handleResetClick"
-    >
-    </page-search>
+    ></page-search>
 
     <!-- 列表 -->
     <page-content
@@ -19,25 +18,40 @@
       @toolbar-click="handleToolbarClick"
       @operate-click="handleOperateClick"
       @filter-change="handleFilterChange"
-    >
-    </page-content>
+    ></page-content>
 
     <!-- 新增 -->
-    <page-modal ref="addModalRef" :modal-config="addModalConfig" @submit-click="handleSubmitClick">
-    </page-modal>
+    <page-modal
+      ref="addModalRef"
+      :modal-config="addModalConfig"
+      @submit-click="handleSubmitClick"
+    ></page-modal>
 
     <!-- 编辑 -->
-    <page-modal ref="editModalRef" :modal-config="editModalConfig" @submit-click="handleSubmitClick">
-    </page-modal>
+    <page-modal
+      ref="editModalRef"
+      :modal-config="editModalConfig"
+      @submit-click="handleSubmitClick"
+    ></page-modal>
+    <!-- 购物 -->
+    <page-modal
+      ref="shoppingModalRef"
+      :modal-config="shoppingModalConfig"
+      @submit-click="handleShoppingSubmit"
+    ></page-modal>
   </div>
 </template>
 
 <script setup lang="ts">
 defineOptions({ name: "BizRepository" });
 
-import BizRepositoryAPI, { BizRepositoryForm, BizRepositoryPageQuery } from "@/api/repository/biz-repository-api";
+import BizRepositoryAPI, {
+  BizRepositoryForm,
+  BizRepositoryPageQuery,
+} from "@/api/repository/biz-repository-api";
 import type { IObject, IModalConfig, IContentConfig, ISearchConfig } from "@/components/CURD/types";
 import usePage from "@/components/CURD/usePage";
+import { hasPerm } from "@/utils/auth";
 
 // 组合式 CRUD
 const {
@@ -45,6 +59,7 @@ const {
   contentRef,
   addModalRef,
   editModalRef,
+  shoppingModalRef,
   handleQueryClick,
   handleResetClick,
   handleAddClick,
@@ -59,6 +74,17 @@ const {
 const searchConfig: ISearchConfig = reactive({
   permPrefix: "repository:biz-repository",
   formItems: [
+    {
+      tips: "支持模糊搜索",
+      type: "input",
+      label: "商品名称",
+      prop: "productName",
+      attrs: {
+        placeholder: "商品名称（如：XX品牌 18.9L 桶装纯净水）",
+        clearable: true,
+        style: { width: "400px" },
+      },
+    },
   ],
 });
 
@@ -96,22 +122,42 @@ const contentConfig: IContentConfig<BizRepositoryPageQuery> = reactive({
   // 表格列配置
   cols: [
     { type: "selection", width: 55, align: "center" },
-    { label: "关系记录唯一标识符", prop: "id" },
-    { label: "部门ID，外键关联部门表", prop: "departmentId" },
-    { label: "产品ID，外键关联产品表", prop: "productId" },
-    { label: "当前库存数量", prop: "currentQuantity" },
-    { label: "累计订购数量", prop: "orderQuantityTotal" },
+    { label: "关系记录唯一标识符", prop: "id", show: false },
+    { label: "站点名称", prop: "departmentName" },
+    { label: "产品名称", prop: "productName" },
+    { label: "最近入库数量", prop: "currentQuantity" },
     { label: "最近订购日期", prop: "orderDateLatest" },
-    { label: "记录创建时间", prop: "createTime" },
-    { label: "记录最后更新时间", prop: "updateTime" },
-    { label: "", prop: "createBy" },
-    { label: "", prop: "updateBy" },
+    { label: "累计入库数量", prop: "orderQuantityTotal" },
+    { label: "记录创建时间", prop: "createTime", show: false },
+    { label: "记录最后更新时间", prop: "updateTime", show: false },
+    { label: "", prop: "createBy", show: false },
+    { label: "", prop: "updateBy", show: false },
     {
       label: "操作",
       prop: "operation",
       width: 220,
       templet: "tool",
-      operat: ["edit", "delete"],
+      operat: [
+        "edit",
+        "delete",
+        {
+          name: "repository_buy",
+          text: "购买",
+          perm: "repository:biz-repository:buy",
+          attrs: {
+            icon: "refresh-left",
+            // color: "#626AEF", // 使用 text 属性，颜色不生效
+            style: {
+              "--el-button-text-color": "#626AEF",
+              "--el-button-hover-link-text-color": "#9197f4",
+            },
+          },
+        },
+      ],
+      show:
+        hasPerm("repository:biz-repository:edit") ||
+        hasPerm("repository:biz-repository:delete") ||
+        hasPerm("repository:biz-repository:buy"),
     },
   ],
 });
@@ -136,7 +182,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "关系记录唯一标识符"
+        placeholder: "关系记录唯一标识符",
       },
       rules: [{ required: true, message: "关系记录唯一标识符不能为空", trigger: "blur" }],
       label: "关系记录唯一标识符",
@@ -145,7 +191,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "部门ID，外键关联部门表"
+        placeholder: "部门ID，外键关联部门表",
       },
       rules: [{ required: true, message: "部门ID，外键关联部门表不能为空", trigger: "blur" }],
       label: "部门ID，外键关联部门表",
@@ -154,7 +200,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "产品ID，外键关联产品表"
+        placeholder: "产品ID，外键关联产品表",
       },
       rules: [{ required: true, message: "产品ID，外键关联产品表不能为空", trigger: "blur" }],
       label: "产品ID，外键关联产品表",
@@ -163,7 +209,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "当前库存数量"
+        placeholder: "当前库存数量",
       },
       rules: [{ required: true, message: "当前库存数量不能为空", trigger: "blur" }],
       label: "当前库存数量",
@@ -172,7 +218,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "累计订购数量"
+        placeholder: "累计订购数量",
       },
       label: "累计订购数量",
       prop: "orderQuantityTotal",
@@ -180,7 +226,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "最近订购日期"
+        placeholder: "最近订购日期",
       },
       label: "最近订购日期",
       prop: "orderDateLatest",
@@ -188,7 +234,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "记录创建时间"
+        placeholder: "记录创建时间",
       },
       rules: [{ required: true, message: "记录创建时间不能为空", trigger: "blur" }],
       label: "记录创建时间",
@@ -197,7 +243,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "记录最后更新时间"
+        placeholder: "记录最后更新时间",
       },
       rules: [{ required: true, message: "记录最后更新时间不能为空", trigger: "blur" }],
       label: "记录最后更新时间",
@@ -206,7 +252,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: ""
+        placeholder: "",
       },
       label: "",
       prop: "createBy",
@@ -214,7 +260,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: ""
+        placeholder: "",
       },
       label: "",
       prop: "updateBy",
@@ -246,19 +292,71 @@ const editModalConfig: IModalConfig<BizRepositoryForm> = reactive({
   },
   formItems: addModalConfig.formItems, // 复用新增的表单项
 });
-
+// 购物配置
+const shoppingModalConfig: IModalConfig = reactive({
+  permPrefix: "repository:biz-repository",
+  component: "dialog",
+  dialog: {
+    title: "购物",
+    width: 500,
+    draggable: true,
+  },
+  form: {
+    labelWidth: 100,
+  },
+  formItems: [
+    {
+      type: "input",
+      attrs: {
+        placeholder: "商品名称",
+        disabled: true,
+      },
+      label: "商品名称",
+      prop: "productName",
+    },
+    {
+      type: "input-number",
+      attrs: {
+        placeholder: "购买数量",
+        min: 1,
+      },
+      label: "购买数量",
+      prop: "quantity",
+      rules: [{ required: true, message: "请输入购买数量", trigger: "blur" }],
+    },
+  ],
+  formAction: (data: any) => {
+    // 这里添加购物逻辑
+    console.log("购买商品:", data.productName, "数量:", data.quantity);
+    return Promise.resolve();
+  },
+});
 // 处理操作按钮点击
 const handleOperateClick = (data: IObject) => {
   if (data.name === "edit") {
     handleEditClick(data.row, async () => {
       return await BizRepositoryAPI.getFormData(data.row.id);
     });
+  } else if (data.name === "repository_buy") {
+    // 处理购物按钮点击
+    const shoppingData = {
+      productName: data.row.productName,
+      quantity: 1, // 默认数量为1
+    };
+    shoppingModalRef.value?.setModalVisible(true);
+    shoppingModalRef.value?.setFormData(shoppingData);
   }
+};
+
+// 处理购物提交
+const handleShoppingSubmit = (data: any) => {
+  console.log("购买商品:", data.productName, "数量:", data.quantity);
+  // 在这里实现实际的购物逻辑
+  shoppingModalRef.value?.setModalVisible(false);
 };
 
 // 处理工具栏按钮点击（删除等）
 const handleToolbarClick = (name: string) => {
   console.log(name);
 };
-
 </script>

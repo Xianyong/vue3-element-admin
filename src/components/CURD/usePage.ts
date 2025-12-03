@@ -6,7 +6,7 @@ function usePage() {
   const contentRef = ref<PageContentInstance>();
   const addModalRef = ref<PageModalInstance>();
   const editModalRef = ref<PageModalInstance>();
-
+  const shoppingModalRef = ref<PageModalInstance>();
   // 搜索
   function handleQueryClick(queryParams: IObject) {
     const filterParams = contentRef.value?.getFilterParams();
@@ -91,6 +91,7 @@ function usePage() {
     contentRef,
     addModalRef,
     editModalRef,
+    shoppingModalRef,
     handleQueryClick,
     handleResetClick,
     handleAddClick,
