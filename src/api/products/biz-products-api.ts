@@ -39,6 +39,24 @@ const BizProductsAPI = {
   },
 
   /**
+   * Product restocking API
+   * @param deptId - Department ID where restocking occurs
+   * @param productId - Product ID to restock
+   * @param quantity - Quantity to restock
+   * @returns Promise with restocking result
+   */
+  restock(deptId: string, productId: string, quantity: number) {
+    return request({
+      url: `${BIZPRODUCTS_BASE_URL}/restock/`,
+      method: "post",
+      data: {
+        deptId: deptId,
+        productId: productId,
+        quantity: quantity,
+      },
+    });
+  },
+  /**
    * 更新商品供应
    *
    * @param id 商品供应ID

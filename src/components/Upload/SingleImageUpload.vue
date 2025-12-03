@@ -35,6 +35,8 @@
 import { UploadRawFile, UploadRequestOptions } from "element-plus";
 import FileAPI, { FileInfo } from "@/api/file-api";
 
+const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
+
 const props = defineProps({
   /**
    * 请求携带的额外参数
@@ -167,7 +169,9 @@ function handleDelete() {
  */
 const onSuccess = (fileInfo: FileInfo) => {
   ElMessage.success("上传成功");
-  modelValue.value = fileInfo.url;
+  console.log("onSuccess", fileInfo);
+  console.log("fileurl", apiBaseUrl + "/upload" + fileInfo.url);
+  modelValue.value = apiBaseUrl + "/upload" + fileInfo.url;
 };
 
 /**

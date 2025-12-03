@@ -4,7 +4,7 @@
     <el-row :gutter="20">
       <!-- 站点树 -->
       <el-col :lg="4" :xs="24" class="mb-[12px]">
-        <DeptTree v-model="queryParams.deptId" @node-click="handleQuery" />
+        <DeptTree v-model="queryParams.deptId" @node-click="handleNodeClick" />
       </el-col>
 
       <!-- 用户列表 -->
@@ -332,7 +332,11 @@ async function fetchData() {
     loading.value = false;
   }
 }
-
+function handleNodeClick(deptInfo: { id: string; name: string }) {
+  queryParams.deptId = deptInfo.id;
+  // nodeName.value = deptInfo.name;
+  handleQuery();
+}
 // 查询（重置页码后获取数据）
 function handleQuery() {
   // console.log("deptId:", userStore.userInfo.deptId);

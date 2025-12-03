@@ -27,6 +27,10 @@ const props = defineProps({
     type: [String, Number],
     default: undefined,
   },
+  deptName: {
+    type: String,
+    default: "",
+  },
 });
 
 const deptList = ref<OptionType[]>(); // 部门列表
@@ -56,14 +60,13 @@ function handleFilter(value: string, data: any) {
   return data.label.indexOf(value) !== -1;
 }
 
-/** 部门树节点 Click */
+/** 树节点 Click */
 function handleNodeClick(data: { [key: string]: any }) {
-  deptId.value = data.value;
-  emits("node-click");
+  emits("node-click", { id: data.value, name: data.label }); // Emit both values
 }
-
 onBeforeMount(() => {
   DeptAPI.getOptions().then((data) => {
+    // console.log("部门列表:", data);
     deptList.value = data;
   });
 });

@@ -32,41 +32,72 @@
     <el-dialog
       v-model="descriptionModalVisible"
       :title="currentRow?.name + ' - 详细信息'"
-      width="500px"
+      width="600px"
     >
       <div v-if="currentRow">
-        <p>
-          <strong>商品名称:</strong>
-          {{ currentRow.name }}
-        </p>
-        <p>
-          <strong>商品规格:</strong>
-          {{ currentRow.specification }}
-        </p>
-        <p>
-          <strong>产地:</strong>
-          {{ currentRow.origin }}
-        </p>
-        <p>
-          <strong>生产日期:</strong>
-          {{ currentRow.productionDate }}
-        </p>
-        <p>
-          <strong>保质日期:</strong>
-          {{ currentRow.expirationDate }}
-        </p>
-        <p>
-          <strong>单价:</strong>
-          {{ currentRow.unitPrice }} 元
-        </p>
-        <p>
-          <strong>详细描述:</strong>
-          {{ currentRow.description }}
-        </p>
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-descriptions :column="1" border>
+              <el-descriptions-item label="商品名称">{{ currentRow.name }}</el-descriptions-item>
+              <el-descriptions-item label="单价">
+                {{ currentRow.unitPrice }} 元
+              </el-descriptions-item>
+              <el-descriptions-item label="详细描述">
+                <span v-if="currentRow.description">{{ currentRow.description }}</span>
+                <span v-else>-</span>
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-col>
+        </el-row>
+
+        <!-- Department Tree Section -->
+        <el-row :gutter="20" class="mt-4" v-hasPerm="['products:biz-products:fillrepo']">
+          <el-col :span="24">
+            <el-card shadow="hover" class="border-radius-8">
+              <template #header>
+                <div class="flex items-center">
+                  <el-icon class="text-green-500 mr-2"><OfficeBuilding /></el-icon>
+                  <span class="font-medium">站点选择:</span>
+                </div>
+              </template>
+              <DeptTree v-model="deptId" @node-click="handleQuery" />
+            </el-card>
+          </el-col>
+        </el-row>
+        <!-- Restock Section -->
+        <el-row :gutter="20" class="mt-4" v-hasPerm="['products:biz-products:fillrepo']">
+          <el-col :span="24">
+            <el-card shadow="hover" class="border-radius-8">
+              <template #header>
+                <div class="flex items-center">
+                  <el-icon class="text-green-500 mr-2"><ShoppingCart /></el-icon>
+                  <span class="font-medium">
+                    <span style="color: red; font-size: large">{{ nodeName }}</span>
+                  </span>
+                </div>
+              </template>
+              <el-row :gutter="15" align="middle">
+                <el-col :span="16">
+                  <el-input-number
+                    v-model="quantity"
+                    :min="1"
+                    :max="99999"
+                    controls-position="right"
+                    placeholder="请输入补货数量"
+                    class="w-full"
+                  />
+                </el-col>
+                <el-col :span="8">
+                  <el-button type="primary" @click="handleRestock" class="w-full">
+                    确认补货
+                  </el-button>
+                </el-col>
+              </el-row>
+            </el-card>
+          </el-col>
+        </el-row>
       </div>
-      <template #footer>
-        <el-button @click="descriptionModalVisible = false">关闭</el-button>
-      </template>
+      <template #footer></template>
     </el-dialog>
 
     <!-- 新增 -->
@@ -91,6 +122,14 @@ defineOptions({ name: "BizProducts" });
 // Add these to your existing script setup
 const descriptionModalVisible = ref(false);
 const currentRow = ref<any>(null);
+
+import { useUserStore } from "@/store";
+
+const userStore = useUserStore();
+
+const deptId = ref();
+const nodeName = ref("");
+const quantity = ref(1);
 
 const showDescriptionModal = (row: any) => {
   currentRow.value = row;
@@ -181,7 +220,7 @@ const contentConfig: IContentConfig<BizProductsPageQuery> = reactive({
     { label: "单价（元）", prop: "unitPrice" },
     { label: "详细信息", prop: "description", templet: "custom", show: false },
     { label: "商品图片", prop: "imagePreview", templet: "image", width: 120 },
-    { label: "预览存储路径", prop: "imagePreview", show: false },
+    { label: "预览存储路径", prop: "imagePreview", show: true },
     { label: "记录创建时间", prop: "createTime", show: false },
     { label: "记录最后更新时间", prop: "updateTime", show: false },
     { label: "记录创建人", prop: "createBy", show: false },
@@ -309,7 +348,7 @@ const addModalConfig: IModalConfig<BizProductsForm> = reactive({
   ],
   // 提交函数
   formAction: (data: BizProductsForm) => {
-    console.log("formAction data:", data);
+    // console.log("formAction data:", data);
     if (data.id) {
       // 编辑
       return BizProductsAPI.update(data.id.toString(), data);
@@ -351,4 +390,41 @@ const handleOperateClick = (data: IObject) => {
 const handleToolbarClick = (name: string) => {
   console.log(name);
 };
+
+function handleQuery(deptInfo: { id: string | number; name: string }) {
+  deptId.value = deptInfo.id;
+  nodeName.value = deptInfo.name;
+}
+
+function handleRestock() {
+  // Validate required parameters before sending request
+  if (!deptId.value) {
+    ElMessage.error("请选择站点");
+    return;
+  }
+
+  if (!currentRow.value?.id) {
+    ElMessage.error("商品信息不完整");
+    return;
+  }
+
+  if (!quantity.value || quantity.value <= 0) {
+    ElMessage.error("请输入有效的补货数量");
+    return;
+  }
+
+  BizProductsAPI.restock(deptId.value, currentRow.value.id, quantity.value)
+    .then(() => {
+      ElMessage.success("补货成功");
+    })
+    .catch((error) => {
+      ElMessage.error("补货失败: " + error.message);
+    });
+}
+
+onMounted(() => {
+  // console.log(dptTree.deptId);
+  deptId.value = userStore.userInfo.deptId;
+  // handleQuery();
+});
 </script>
