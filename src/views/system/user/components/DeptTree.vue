@@ -1,7 +1,7 @@
 <!-- 部门树 -->
 <template>
   <el-card shadow="never">
-    <el-input v-model="deptName" placeholder="部门名称" clearable>
+    <el-input v-model="searchDeptName" placeholder="部门名称" clearable>
       <template #prefix>
         <el-icon><Search /></el-icon>
       </template>
@@ -35,15 +35,15 @@ const props = defineProps({
 
 const deptList = ref<OptionType[]>(); // 部门列表
 const deptTreeRef = ref(); // 部门树
-const deptName = ref(); // 部门名称
+const searchDeptName = ref(); // 部门名称
 
 const emits = defineEmits(["node-click"]);
 
-const deptId = useVModel(props, "modelValue", emits);
+// const deptId = useVModel(props, "modelValue", emits);
 
 watchEffect(
   () => {
-    deptTreeRef.value.filter(deptName.value);
+    deptTreeRef.value.filter(searchDeptName.value);
   },
   {
     flush: "post", // watchEffect会在DOM挂载或者更新之前就会触发，此属性控制在DOM元素更新后运行
