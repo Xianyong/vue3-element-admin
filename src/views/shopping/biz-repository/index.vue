@@ -34,10 +34,11 @@
       @submit-click="handleSubmitClick"
     ></page-modal>
     <!-- 购物 -->
+    <!-- 修改购物模态框的 submit-click 绑定 -->
     <page-modal
       ref="shoppingModalRef"
       :modal-config="shoppingModalConfig"
-      @submit-click="handleShoppingSubmit"
+      @submit-click="() => handleShoppingSubmit"
     ></page-modal>
   </div>
 </template>
@@ -53,6 +54,12 @@ import type { IObject, IModalConfig, IContentConfig, ISearchConfig } from "@/com
 import usePage from "@/components/CURD/usePage";
 import { hasPerm } from "@/utils/auth";
 
+import BizOrdersAPI from "@/api/orders/biz-orders-api";
+import { useUserStore } from "@/store";
+
+const userStore = useUserStore();
+import UserAPI from "@/api/system/user-api";
+import { userInfo } from "os";
 // 组合式 CRUD
 const {
   searchRef,
@@ -125,6 +132,7 @@ const contentConfig: IContentConfig<BizRepositoryPageQuery> = reactive({
     { label: "关系记录唯一标识符", prop: "id", show: false },
     { label: "站点名称", prop: "departmentName" },
     { label: "产品名称", prop: "productName" },
+    { label: "产品单价", prop: "productUnitPrice" },
     { label: "当前库存数量", prop: "currentQuantity" },
     { label: "最近订购日期", prop: "orderDateLatest" },
     { label: "累计入库数量", prop: "orderQuantityTotal" },
@@ -269,6 +277,16 @@ const shoppingModalConfig: IModalConfig = reactive({
     {
       type: "input-number",
       attrs: {
+        placeholder: "产品单价",
+        min: 1,
+      },
+      label: "产品单价",
+      prop: "productUnitPrice",
+      rules: [{ required: true, message: "请输入购买单价", trigger: "blur" }],
+    },
+    {
+      type: "input-number",
+      attrs: {
         placeholder: "购买数量",
         min: 1,
       },
@@ -276,10 +294,37 @@ const shoppingModalConfig: IModalConfig = reactive({
       prop: "quantity",
       rules: [{ required: true, message: "请输入购买数量", trigger: "blur" }],
     },
+    {
+      type: "input",
+      label: "仓库ID",
+      prop: "repositoryId",
+      hidden: true,
+    },
   ],
   formAction: (data: any) => {
-    // 这里添加购物逻辑
-    console.log("购买商品:", data.productName, "数量:", data.quantity);
+    console.log(
+      "购买商品:",
+      data.productName,
+      "数量:",
+      data.quantity,
+      data.productUnitPrice,
+      "库存ID:",
+      data.repositoryId
+    );
+
+    BizOrdersAPI.buy({
+      repoId: data.repositoryId,
+      quantity: data.quantity,
+      unitPrice: data.productUnitPrice,
+      totalAmount: data.quantity * data.productUnitPrice,
+    })
+      .then(() => {
+        ElMessage.success("下单成功");
+      })
+      .catch((error) => {
+        ElMessage.error("下单失败: " + error.message);
+      });
+
     return Promise.resolve();
   },
 });
@@ -292,18 +337,16 @@ const handleOperateClick = (data: IObject) => {
   } else if (data.name === "repository_buy") {
     // 处理购物按钮点击
     const shoppingData = {
+      repositoryId: data.row.id,
       productName: data.row.productName,
+      productUnitPrice: data.row.productUnitPrice,
       quantity: 1, // 默认数量为1
     };
     shoppingModalRef.value?.setModalVisible(true);
     shoppingModalRef.value?.setFormData(shoppingData);
   }
 };
-
-// 处理购物提交
-const handleShoppingSubmit = (data: any) => {
-  console.log("购买商品:", data.productName, "数量:", data.quantity);
-  // 在这里实现实际的购物逻辑
+const handleShoppingSubmit = (formData: any) => {
   shoppingModalRef.value?.setModalVisible(false);
 };
 

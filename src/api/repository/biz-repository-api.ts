@@ -130,6 +130,8 @@ export interface BizRepositoryPageVO {
   productId?: number;
   /** 产品名称 */
   productName?: string;
+  /** 产品单价 */
+  productUnitPrice?: number;
   /** 当前库存数量 */
   currentQuantity?: number;
   /** 累计订购数量 */

@@ -38,6 +38,18 @@ const BizOrdersAPI = {
   },
 
   /**
+   *  添加订单
+   *
+   *  @param data 订单表单数据
+   */
+  buy(data: BizOrdersForm) {
+    return request({
+      url: `${BIZORDERS_BASE_URL}/buy`,
+      method: "post",
+      data,
+    });
+  },
+  /**
    * 更新订单
    *
    * @param id 订单ID
