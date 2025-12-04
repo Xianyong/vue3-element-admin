@@ -125,7 +125,7 @@ const contentConfig: IContentConfig<BizRepositoryPageQuery> = reactive({
     { label: "关系记录唯一标识符", prop: "id", show: false },
     { label: "站点名称", prop: "departmentName" },
     { label: "产品名称", prop: "productName" },
-    { label: "最近入库数量", prop: "currentQuantity" },
+    { label: "当前库存数量", prop: "currentQuantity" },
     { label: "最近订购日期", prop: "orderDateLatest" },
     { label: "累计入库数量", prop: "orderQuantityTotal" },
     { label: "记录创建时间", prop: "createTime", show: false },
@@ -179,33 +179,16 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
   },
   // 表单项配置
   formItems: [
-    {
-      type: "input",
-      attrs: {
-        placeholder: "关系记录唯一标识符",
-      },
-      rules: [{ required: true, message: "关系记录唯一标识符不能为空", trigger: "blur" }],
-      label: "关系记录唯一标识符",
-      prop: "id",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "部门ID，外键关联部门表",
-      },
-      rules: [{ required: true, message: "部门ID，外键关联部门表不能为空", trigger: "blur" }],
-      label: "部门ID，外键关联部门表",
-      prop: "departmentId",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "产品ID，外键关联产品表",
-      },
-      rules: [{ required: true, message: "产品ID，外键关联产品表不能为空", trigger: "blur" }],
-      label: "产品ID，外键关联产品表",
-      prop: "productId",
-    },
+    // {
+    //   type: "input",
+    //   attrs: {
+    //     placeholder: "关系记录唯一标识符",
+    //   },
+    //   rules: [{ required: true, message: "关系记录唯一标识符不能为空", trigger: "blur" }],
+    //   label: "关系记录唯一标识符",
+    //   prop: "id",
+    //   show: () => false,
+    // },
     {
       type: "input",
       attrs: {
@@ -220,6 +203,7 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
       attrs: {
         placeholder: "累计订购数量",
       },
+      rules: [{ required: true, message: "累计库存数量不能为空", trigger: "blur" }],
       label: "累计订购数量",
       prop: "orderQuantityTotal",
     },
@@ -231,45 +215,12 @@ const addModalConfig: IModalConfig<BizRepositoryForm> = reactive({
       label: "最近订购日期",
       prop: "orderDateLatest",
     },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "记录创建时间",
-      },
-      rules: [{ required: true, message: "记录创建时间不能为空", trigger: "blur" }],
-      label: "记录创建时间",
-      prop: "createTime",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "记录最后更新时间",
-      },
-      rules: [{ required: true, message: "记录最后更新时间不能为空", trigger: "blur" }],
-      label: "记录最后更新时间",
-      prop: "updateTime",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "",
-      },
-      label: "",
-      prop: "createBy",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "",
-      },
-      label: "",
-      prop: "updateBy",
-    },
   ],
   // 提交函数
   formAction: (data: BizRepositoryForm) => {
     if (data.id) {
       // 编辑
+      // console.log("formAction data11:", data);
       return BizRepositoryAPI.update(data.id as string, data);
     } else {
       // 新增
@@ -288,6 +239,7 @@ const editModalConfig: IModalConfig<BizRepositoryForm> = reactive({
   },
   pk: "id",
   formAction(data: any) {
+    // console.log("formAction data22:", data.id, data);
     return BizRepositoryAPI.update(data.id as string, data);
   },
   formItems: addModalConfig.formItems, // 复用新增的表单项

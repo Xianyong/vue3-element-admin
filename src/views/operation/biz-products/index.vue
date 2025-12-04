@@ -51,7 +51,7 @@
         </el-row>
 
         <!-- Department Tree Section -->
-        <el-row :gutter="20" class="mt-4" v-hasPerm="['products:biz-products:fillrepo']">
+        <el-row v-hasPerm="['products:biz-products:fillrepo']" :gutter="20" class="mt-4">
           <el-col :span="24">
             <el-card shadow="hover" class="border-radius-8">
               <template #header>
@@ -65,14 +65,14 @@
           </el-col>
         </el-row>
         <!-- Restock Section -->
-        <el-row :gutter="20" class="mt-4" v-hasPerm="['products:biz-products:fillrepo']">
+        <el-row v-hasPerm="['products:biz-products:fillrepo']" :gutter="20" class="mt-4">
           <el-col :span="24">
             <el-card shadow="hover" class="border-radius-8">
               <template #header>
                 <div class="flex items-center">
                   <el-icon class="text-green-500 mr-2"><ShoppingCart /></el-icon>
                   <span class="font-medium">
-                    <span style="color: red; font-size: large">{{ nodeName }}</span>
+                    <span style=" font-size: large;color: red">{{ nodeName }}</span>
                   </span>
                 </div>
               </template>
@@ -88,7 +88,7 @@
                   />
                 </el-col>
                 <el-col :span="8">
-                  <el-button type="primary" @click="handleRestock" class="w-full">
+                  <el-button type="primary" class="w-full" @click="handleRestock">
                     确认补货
                   </el-button>
                 </el-col>
@@ -135,6 +135,8 @@ const showDescriptionModal = (row: any) => {
   currentRow.value = row;
   descriptionModalVisible.value = true;
 };
+
+import BizRepositoryAPI from "@/api/repository/biz-repository-api";
 
 import BizProductsAPI, {
   BizProductsForm,
@@ -413,7 +415,7 @@ function handleRestock() {
     return;
   }
 
-  BizProductsAPI.restock(deptId.value, currentRow.value.id, quantity.value)
+  BizRepositoryAPI.restock(deptId.value, currentRow.value.id, quantity.value)
     .then(() => {
       ElMessage.success("补货成功");
     })

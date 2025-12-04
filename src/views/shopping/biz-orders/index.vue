@@ -6,8 +6,7 @@
       :search-config="searchConfig"
       @query-click="handleQueryClick"
       @reset-click="handleResetClick"
-    >
-    </page-search>
+    ></page-search>
 
     <!-- 列表 -->
     <page-content
@@ -19,16 +18,21 @@
       @toolbar-click="handleToolbarClick"
       @operate-click="handleOperateClick"
       @filter-change="handleFilterChange"
-    >
-    </page-content>
+    ></page-content>
 
     <!-- 新增 -->
-    <page-modal ref="addModalRef" :modal-config="addModalConfig" @submit-click="handleSubmitClick">
-    </page-modal>
+    <page-modal
+      ref="addModalRef"
+      :modal-config="addModalConfig"
+      @submit-click="handleSubmitClick"
+    ></page-modal>
 
     <!-- 编辑 -->
-    <page-modal ref="editModalRef" :modal-config="editModalConfig" @submit-click="handleSubmitClick">
-    </page-modal>
+    <page-modal
+      ref="editModalRef"
+      :modal-config="editModalConfig"
+      @submit-click="handleSubmitClick"
+    ></page-modal>
   </div>
 </template>
 
@@ -38,6 +42,7 @@ defineOptions({ name: "BizOrders" });
 import BizOrdersAPI, { BizOrdersForm, BizOrdersPageQuery } from "@/api/orders/biz-orders-api";
 import type { IObject, IModalConfig, IContentConfig, ISearchConfig } from "@/components/CURD/types";
 import usePage from "@/components/CURD/usePage";
+import { hasPerm } from "@/utils/auth";
 
 // 组合式 CRUD
 const {
@@ -57,8 +62,19 @@ const {
 
 // 搜索配置
 const searchConfig: ISearchConfig = reactive({
-  permPrefix: "orders:biz-orders",
+  permPrefix: "orders:biz-orders:query",
   formItems: [
+    {
+      tips: "支持模糊搜索",
+      type: "input",
+      label: "商品名称",
+      prop: "productName",
+      attrs: {
+        placeholder: "商品名称（如：XX品牌 18.9L 桶装纯净水）",
+        clearable: true,
+        style: { width: "400px" },
+      },
+    },
   ],
 });
 
@@ -96,23 +112,28 @@ const contentConfig: IContentConfig<BizOrdersPageQuery> = reactive({
   // 表格列配置
   cols: [
     { type: "selection", width: 55, align: "center" },
-    { label: "订单唯一标识符", prop: "id" },
-    { label: "站点ID，外键关联部门表", prop: "repoId" },
-    { label: "用户ID，外键关联用户表", prop: "userId" },
-    { label: "购买数量", prop: "quantity" },
+    { label: "订单唯一标识符", prop: "id", show: false },
+    { label: "站点ID，外键关联部门表", prop: "repoId", show: false },
+    { label: "用户ID，外键关联用户表", prop: "userId", show: false },
+    { label: "用户名称", prop: "userName" },
+    { label: "站点名称", prop: "departmentName" },
+    { label: "商品名称", prop: "productName" },
     { label: "商品单价（下单时价格）", prop: "unitPrice" },
+    { label: "购买数量", prop: "quantity" },
+
     { label: "订单总金额", prop: "totalAmount" },
     { label: "订单日期（下单时间）", prop: "orderDate" },
-    { label: "记录创建人（用户ID）", prop: "createBy" },
-    { label: "记录创建时间", prop: "createTime" },
-    { label: "记录最后修改人", prop: "updateBy" },
-    { label: "记录最后修改时间", prop: "updateTime" },
+    { label: "记录创建人（用户ID）", prop: "createBy", show: false },
+    { label: "记录创建时间", prop: "createTime", show: false },
+    { label: "记录最后修改人", prop: "updateBy", show: false },
+    { label: "记录最后修改时间", prop: "updateTime", show: false },
     {
       label: "操作",
       prop: "operation",
       width: 220,
       templet: "tool",
       operat: ["edit", "delete"],
+      show: hasPerm("orders:biz-orders:edit") || hasPerm("orders:biz-orders:delete"),
     },
   ],
 });
@@ -137,33 +158,7 @@ const addModalConfig: IModalConfig<BizOrdersForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "订单唯一标识符"
-      },
-      label: "订单唯一标识符",
-      prop: "id",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "站点ID，外键关联部门表"
-      },
-      rules: [{ required: true, message: "站点ID，外键关联部门表不能为空", trigger: "blur" }],
-      label: "站点ID，外键关联部门表",
-      prop: "repoId",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "用户ID，外键关联用户表"
-      },
-      rules: [{ required: true, message: "用户ID，外键关联用户表不能为空", trigger: "blur" }],
-      label: "用户ID，外键关联用户表",
-      prop: "userId",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "购买数量"
+        placeholder: "购买数量",
       },
       rules: [{ required: true, message: "购买数量不能为空", trigger: "blur" }],
       label: "购买数量",
@@ -172,7 +167,7 @@ const addModalConfig: IModalConfig<BizOrdersForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "商品单价（下单时价格）"
+        placeholder: "商品单价（下单时价格）",
       },
       rules: [{ required: true, message: "商品单价（下单时价格）不能为空", trigger: "blur" }],
       label: "商品单价（下单时价格）",
@@ -181,7 +176,7 @@ const addModalConfig: IModalConfig<BizOrdersForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "订单总金额"
+        placeholder: "订单总金额",
       },
       rules: [{ required: true, message: "订单总金额不能为空", trigger: "blur" }],
       label: "订单总金额",
@@ -190,46 +185,11 @@ const addModalConfig: IModalConfig<BizOrdersForm> = reactive({
     {
       type: "input",
       attrs: {
-        placeholder: "订单日期（下单时间）"
+        placeholder: "订单日期（下单时间）",
       },
       rules: [{ required: true, message: "订单日期（下单时间）不能为空", trigger: "blur" }],
       label: "订单日期（下单时间）",
       prop: "orderDate",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "记录创建人（用户ID）"
-      },
-      rules: [{ required: true, message: "记录创建人（用户ID）不能为空", trigger: "blur" }],
-      label: "记录创建人（用户ID）",
-      prop: "createBy",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "记录创建时间"
-      },
-      rules: [{ required: true, message: "记录创建时间不能为空", trigger: "blur" }],
-      label: "记录创建时间",
-      prop: "createTime",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "记录最后修改人"
-      },
-      label: "记录最后修改人",
-      prop: "updateBy",
-    },
-    {
-      type: "input",
-      attrs: {
-        placeholder: "记录最后修改时间"
-      },
-      rules: [{ required: true, message: "记录最后修改时间不能为空", trigger: "blur" }],
-      label: "记录最后修改时间",
-      prop: "updateTime",
     },
   ],
   // 提交函数
@@ -272,5 +232,4 @@ const handleOperateClick = (data: IObject) => {
 const handleToolbarClick = (name: string) => {
   console.log(name);
 };
-
 </script>

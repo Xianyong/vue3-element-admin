@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 
-const BIZREPOSITORY_BASE_URL = "/api/v1/biz-repository";
+const BIZREPOSITORY_BASE_URL = "/api/v1/repository";
 
 const BizRepositoryAPI = {
   /** 获取商品选购分页数据 */
@@ -62,12 +62,39 @@ const BizRepositoryAPI = {
       method: "delete",
     });
   },
+
+  /**
+   * Product restocking API
+   * @param deptId - Department ID where restocking occurs
+   * @param productId - Product ID to restock
+   * @param quantity - Quantity to restock
+   * @returns Promise with restocking result
+   */
+  restock(deptId: number, productId: number, quantity: number) {
+    console.log("restock", deptId, productId, quantity);
+    return request({
+      url: `${BIZREPOSITORY_BASE_URL}/restock`,
+      method: "post",
+      data: {
+        departmentId: deptId,
+        productId,
+        currentQuantity: quantity,
+      },
+    });
+  },
 };
 
 export default BizRepositoryAPI;
 
 /** 商品选购分页查询参数 */
-export interface BizRepositoryPageQuery extends PageQuery {}
+export interface BizRepositoryPageQuery extends PageQuery {
+  /** 站点ID，外键关联部门表 */
+  departmentId?: number;
+  /** 产品ID，外键关联产品表 */
+  productId?: number;
+  /** 站点名称、产品名称，用于模糊搜索 */
+  keyword?: string;
+}
 
 /** 商品选购表单对象 */
 export interface BizRepositoryForm {
